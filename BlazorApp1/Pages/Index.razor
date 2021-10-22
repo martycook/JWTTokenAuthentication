@@ -1,0 +1,50 @@
+﻿@page "/"
+@using BlazorApp1.Models
+@using System.Net.Http.Json
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<SurveyPrompt Title="How is Blazor working for you?" />
+
+<div style="max-width: 400px">
+    <EditForm Model="@Model" OnSubmit="OnSubmit" >
+        <div class="form-group">
+            <label>Account Key:</label>
+            <InputText class="form-control" id="accountkey" @bind-Value="@Model.AccountKey" />
+        </div>    
+        <div class="form-group">
+            <label>Security Key:</label>
+            <InputText class="form-control" id="securitykey" @bind-Value="@Model.SecurityKey" />
+        </div>    
+        <button type="submit">Login</button>
+    </EditForm>
+    <div>
+        @if (false == string.IsNullOrEmpty(Json))
+        {
+            <p class="mt-4 alert-info">@Json</p>
+        }
+    </div>
+</div>
+
+@code {
+    [Inject]
+    HttpClient Client { get; set; }
+
+    LoginRequest Model = new() {  AccountKey = "martin", SecurityKey = "codegator" };
+    string Json { get; set; }
+
+    void OnSubmit(EditContext edit)
+    {
+        var result = Client.PostAsync("https://localhost:44397/api/accounts/login", JsonContent.Create(Model)
+            ).Result;
+        result.EnsureSuccessStatusCode();
+        var type = new { authToken = "" };
+        dynamic token = result.Content.ReadFromJsonAsync(type.GetType()).Result;
+        Client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer",token.authToken);
+        result = Client.GetAsync("https://localhost:44397/api/values").Result;
+        result.EnsureSuccessStatusCode();
+        Json = result.Content.ReadAsStringAsync().Result;
+    }
+}
