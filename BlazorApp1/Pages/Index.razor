@@ -37,13 +37,13 @@ Welcome to your new app.
 
     void OnSubmit(EditContext edit)
     {
-        var result = Client.PostAsync("https://localhost:44397/api/accounts/login", JsonContent.Create(Model)
+        var result = Client.PostAsync("https://localhost:52871/api/accounts/login", JsonContent.Create(Model)
             ).Result;
         result.EnsureSuccessStatusCode();
         var type = new { authToken = "" };
         dynamic token = result.Content.ReadFromJsonAsync(type.GetType()).Result;
         Client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer",token.authToken);
-        result = Client.GetAsync("https://localhost:44397/api/values").Result;
+        result = Client.GetAsync("https://localhost:52871/api/values").Result;
         result.EnsureSuccessStatusCode();
         Json = result.Content.ReadAsStringAsync().Result;
     }
